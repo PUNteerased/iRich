@@ -18,5 +18,6 @@ dashboard/node_modules/
 dashboard/.next/
 dashboard/.env.local
 dashboard/.vercel/
+scripts/cloudflare_tunnel.token
 .DS_Store
 *.tmp
