@@ -1,0 +1,286 @@
+[
+  {
+    "symbol": "EURUSD",
+    "rows": 29481,
+    "threshold": 0.75,
+    "folds": [
+      {
+        "fold": 1,
+        "train_rows": 14740,
+        "test_rows": 2948,
+        "test_from": "2026-07-17 14:13:00+00:00",
+        "test_to": "2026-07-21 16:15:00+00:00",
+        "signals_at_threshold": 711,
+        "signal_rate": 0.24118,
+        "precision_at_threshold": 0.5584,
+        "recall_at_threshold": 0.6117,
+        "accuracy_all": 0.4637
+      },
+      {
+        "fold": 2,
+        "train_rows": 17688,
+        "test_rows": 2948,
+        "test_from": "2026-07-21 16:16:00+00:00",
+        "test_to": "2026-07-23 18:34:00+00:00",
+        "signals_at_threshold": 668,
+        "signal_rate": 0.22659,
+        "precision_at_threshold": 0.5778,
+        "recall_at_threshold": 0.6117,
+        "accuracy_all": 0.4586
+      },
+      {
+        "fold": 3,
+        "train_rows": 20636,
+        "test_rows": 2948,
+        "test_from": "2026-07-23 18:35:00+00:00",
+        "test_to": "2026-07-27 20:28:00+00:00",
+        "signals_at_threshold": 1578,
+        "signal_rate": 0.53528,
+        "precision_at_threshold": 0.4461,
+        "recall_at_threshold": 0.4882,
+        "accuracy_all": 0.4315
+      },
+      {
+        "fold": 4,
+        "train_rows": 23584,
+        "test_rows": 2948,
+        "test_from": "2026-07-27 20:29:00+00:00",
+        "test_to": "2026-07-29 22:22:00+00:00",
+        "signals_at_threshold": 665,
+        "signal_rate": 0.22558,
+        "precision_at_threshold": 0.5278,
+        "recall_at_threshold": 0.5536,
+        "accuracy_all": 0.459
+      },
+      {
+        "fold": 5,
+        "train_rows": 26532,
+        "test_rows": 2949,
+        "test_from": "2026-07-29 22:23:00+00:00",
+        "test_to": "2026-07-31 23:58:00+00:00",
+        "signals_at_threshold": 1472,
+        "signal_rate": 0.49915,
+        "precision_at_threshold": 0.4531,
+        "recall_at_threshold": 0.5115,
+        "accuracy_all": 0.434
+      }
+    ],
+    "folds_with_signals": 5,
+    "mean_precision_at_threshold": 0.5126,
+    "min_precision_at_threshold": 0.4461,
+    "total_signals": 5094
+  },
+  {
+    "symbol": "USDJPY",
+    "rows": 29497,
+    "threshold": 0.75,
+    "folds": [
+      {
+        "fold": 1,
+        "train_rows": 14748,
+        "test_rows": 2949,
+        "test_from": "2026-07-17 13:50:00+00:00",
+        "test_to": "2026-07-21 16:02:00+00:00",
+        "signals_at_threshold": 1703,
+        "signal_rate": 0.57748,
+        "precision_at_threshold": 0.4768,
+        "recall_at_threshold": 0.5581,
+        "accuracy_all": 0.433
+      },
+      {
+        "fold": 2,
+        "train_rows": 17697,
+        "test_rows": 2949,
+        "test_from": "2026-07-21 16:03:00+00:00",
+        "test_to": "2026-07-23 17:49:00+00:00",
+        "signals_at_threshold": 771,
+        "signal_rate": 0.26144,
+        "precision_at_threshold": 0.4968,
+        "recall_at_threshold": 0.5417,
+        "accuracy_all": 0.4317
+      },
+      {
+        "fold": 3,
+        "train_rows": 20646,
+        "test_rows": 2949,
+        "test_from": "2026-07-23 17:50:00+00:00",
+        "test_to": "2026-07-27 19:44:00+00:00",
+        "signals_at_threshold": 1919,
+        "signal_rate": 0.65073,
+        "precision_at_threshold": 0.4482,
+        "recall_at_threshold": 0.4889,
+        "accuracy_all": 0.4446
+      },
+      {
+        "fold": 4,
+        "train_rows": 23595,
+        "test_rows": 2949,
+        "test_from": "2026-07-27 19:45:00+00:00",
+        "test_to": "2026-07-29 21:56:00+00:00",
+        "signals_at_threshold": 1789,
+        "signal_rate": 0.60665,
+        "precision_at_threshold": 0.4477,
+        "recall_at_threshold": 0.5025,
+        "accuracy_all": 0.4062
+      },
+      {
+        "fold": 5,
+        "train_rows": 26544,
+        "test_rows": 2953,
+        "test_from": "2026-07-29 21:57:00+00:00",
+        "test_to": "2026-07-31 23:57:00+00:00",
+        "signals_at_threshold": 950,
+        "signal_rate": 0.32171,
+        "precision_at_threshold": 0.4074,
+        "recall_at_threshold": 0.5119,
+        "accuracy_all": 0.4043
+      }
+    ],
+    "folds_with_signals": 5,
+    "mean_precision_at_threshold": 0.4554,
+    "min_precision_at_threshold": 0.4074,
+    "total_signals": 7132
+  },
+  {
+    "symbol": "XAUUSD",
+    "rows": 29744,
+    "threshold": 0.75,
+    "folds": [
+      {
+        "fold": 1,
+        "train_rows": 14872,
+        "test_rows": 2974,
+        "test_from": "2026-07-17 04:23:00+00:00",
+        "test_to": "2026-07-21 08:16:00+00:00",
+        "signals_at_threshold": 765,
+        "signal_rate": 0.25723,
+        "precision_at_threshold": 0.3582,
+        "recall_at_threshold": 0.4096,
+        "accuracy_all": 0.3578
+      },
+      {
+        "fold": 2,
+        "train_rows": 17846,
+        "test_rows": 2974,
+        "test_from": "2026-07-21 08:17:00+00:00",
+        "test_to": "2026-07-23 12:10:00+00:00",
+        "signals_at_threshold": 242,
+        "signal_rate": 0.08137,
+        "precision_at_threshold": 0.5992,
+        "recall_at_threshold": 0.6971,
+        "accuracy_all": 0.4842
+      },
+      {
+        "fold": 3,
+        "train_rows": 20820,
+        "test_rows": 2974,
+        "test_from": "2026-07-23 12:11:00+00:00",
+        "test_to": "2026-07-27 16:04:00+00:00",
+        "signals_at_threshold": 135,
+        "signal_rate": 0.04539,
+        "precision_at_threshold": 0.4889,
+        "recall_at_threshold": 0.5641,
+        "accuracy_all": 0.4455
+      },
+      {
+        "fold": 4,
+        "train_rows": 23794,
+        "test_rows": 2974,
+        "test_from": "2026-07-27 16:05:00+00:00",
+        "test_to": "2026-07-29 19:58:00+00:00",
+        "signals_at_threshold": 102,
+        "signal_rate": 0.0343,
+        "precision_at_threshold": 0.6863,
+        "recall_at_threshold": 0.7071,
+        "accuracy_all": 0.3863
+      },
+      {
+        "fold": 5,
+        "train_rows": 26768,
+        "test_rows": 2976,
+        "test_from": "2026-07-29 19:59:00+00:00",
+        "test_to": "2026-07-31 23:54:00+00:00",
+        "signals_at_threshold": 74,
+        "signal_rate": 0.02487,
+        "precision_at_threshold": 0.473,
+        "recall_at_threshold": 0.4795,
+        "accuracy_all": 0.4499
+      }
+    ],
+    "folds_with_signals": 5,
+    "mean_precision_at_threshold": 0.5211,
+    "min_precision_at_threshold": 0.3582,
+    "total_signals": 1318
+  },
+  {
+    "symbol": "BTCUSD",
+    "rows": 28445,
+    "threshold": 0.75,
+    "folds": [
+      {
+        "fold": 1,
+        "train_rows": 14222,
+        "test_rows": 2844,
+        "test_from": "2026-07-22 04:59:00+00:00",
+        "test_to": "2026-07-24 05:00:00+00:00",
+        "signals_at_threshold": 407,
+        "signal_rate": 0.14311,
+        "precision_at_threshold": 0.5086,
+        "recall_at_threshold": 0.5718,
+        "accuracy_all": 0.4543
+      },
+      {
+        "fold": 2,
+        "train_rows": 17066,
+        "test_rows": 2844,
+        "test_from": "2026-07-24 05:01:00+00:00",
+        "test_to": "2026-07-26 10:06:00+00:00",
+        "signals_at_threshold": 509,
+        "signal_rate": 0.17897,
+        "precision_at_threshold": 0.5658,
+        "recall_at_threshold": 0.5854,
+        "accuracy_all": 0.5207
+      },
+      {
+        "fold": 3,
+        "train_rows": 19910,
+        "test_rows": 2844,
+        "test_from": "2026-07-26 10:07:00+00:00",
+        "test_to": "2026-07-28 12:11:00+00:00",
+        "signals_at_threshold": 410,
+        "signal_rate": 0.14416,
+        "precision_at_threshold": 0.4829,
+        "recall_at_threshold": 0.5455,
+        "accuracy_all": 0.4272
+      },
+      {
+        "fold": 4,
+        "train_rows": 22754,
+        "test_rows": 2844,
+        "test_from": "2026-07-28 12:12:00+00:00",
+        "test_to": "2026-07-30 11:43:00+00:00",
+        "signals_at_threshold": 40,
+        "signal_rate": 0.01406,
+        "precision_at_threshold": 0.075,
+        "recall_at_threshold": 0.0811,
+        "accuracy_all": 0.4357
+      },
+      {
+        "fold": 5,
+        "train_rows": 25598,
+        "test_rows": 2847,
+        "test_from": "2026-07-30 11:44:00+00:00",
+        "test_to": "2026-08-01 17:04:00+00:00",
+        "signals_at_threshold": 204,
+        "signal_rate": 0.07165,
+        "precision_at_threshold": 0.2696,
+        "recall_at_threshold": 0.3005,
+        "accuracy_all": 0.4461
+      }
+    ],
+    "folds_with_signals": 5,
+    "mean_precision_at_threshold": 0.3804,
+    "min_precision_at_threshold": 0.075,
+    "total_signals": 1570
+  }
+]

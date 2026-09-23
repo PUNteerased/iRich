@@ -1,0 +1,37 @@
+{
+  "captured_at": "2026-08-16T13:32:45.096407+00:00",
+  "symbols": {
+    "EURUSD": {
+      "symbol": "EURUSD",
+      "point": 1e-05,
+      "digits": 5,
+      "tick_size": 1e-05,
+      "tick_value": 1.0,
+      "filling_mode": 3
+    },
+    "USDJPY": {
+      "symbol": "USDJPY",
+      "point": 0.001,
+      "digits": 3,
+      "tick_size": 0.001,
+      "tick_value": 0.6275927425175255,
+      "filling_mode": 1
+    },
+    "XAUUSD": {
+      "symbol": "XAUUSD",
+      "point": 0.01,
+      "digits": 2,
+      "tick_size": 0.01,
+      "tick_value": 1.0,
+      "filling_mode": 3
+    },
+    "BTCUSD": {
+      "symbol": "BTCUSD",
+      "point": 0.01,
+      "digits": 2,
+      "tick_size": 0.01,
+      "tick_value": 0.01,
+      "filling_mode": 1
+    }
+  }
+}

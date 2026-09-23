@@ -1,0 +1,58 @@
+{
+  "results": [
+    {
+      "symbol": "EURUSD",
+      "test_rows": 8845,
+      "fixed": {
+        "n": 435,
+        "precision": 0.2023
+      },
+      "online": {
+        "n": 50,
+        "precision": 0.86
+      },
+      "recommend_enable": true
+    },
+    {
+      "symbol": "USDJPY",
+      "test_rows": 8850,
+      "fixed": {
+        "n": 1097,
+        "precision": 0.2671
+      },
+      "online": {
+        "n": 89,
+        "precision": 0.7978
+      },
+      "recommend_enable": true
+    },
+    {
+      "symbol": "XAUUSD",
+      "test_rows": 8924,
+      "fixed": {
+        "n": 362,
+        "precision": 0.547
+      },
+      "online": {
+        "n": 46,
+        "precision": 0.7391
+      },
+      "recommend_enable": true
+    },
+    {
+      "symbol": "BTCUSD",
+      "test_rows": 8534,
+      "fixed": {
+        "n": 151,
+        "precision": 0.2715
+      },
+      "online": {
+        "n": 4,
+        "precision": 0.0
+      },
+      "recommend_enable": false
+    }
+  ],
+  "recommend_enable_online_confidence": true,
+  "note": "Enable learning.online_confidence only when recommend_enable is true for symbols you trade; default remains fixed 0.75 until then."
+}

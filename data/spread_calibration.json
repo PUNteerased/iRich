@@ -1,0 +1,35 @@
+{
+  "updated_at": "2026-09-22T14:45:09.883350+00:00",
+  "method": "bootstrap_from_m1_range",
+  "warning": "Replace with scripts/calibrate_spread.py multi-session samples (london_ny_overlap, asian_quiet, high_impact_news) before Phase 1 sign-off.",
+  "symbols": {
+    "EURUSD": {
+      "max_points": 1.13,
+      "sample_count": 30000,
+      "p50_range_points": 9.0,
+      "source": "bootstrap_from_m1_range",
+      "hard_cap_applied": false
+    },
+    "USDJPY": {
+      "max_points": 1.37,
+      "sample_count": 30000,
+      "p50_range_points": 11.0,
+      "source": "bootstrap_from_m1_range",
+      "hard_cap_applied": false
+    },
+    "XAUUSD": {
+      "max_points": 19.38,
+      "sample_count": 30000,
+      "p50_range_points": 155.0,
+      "source": "bootstrap_from_m1_range",
+      "hard_cap_applied": false
+    },
+    "BTCUSD": {
+      "max_points": 200.0,
+      "sample_count": 30000,
+      "p50_range_points": 2360.0,
+      "source": "bootstrap_from_m1_range",
+      "hard_cap_applied": true
+    }
+  }
+}

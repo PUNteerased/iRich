@@ -1,0 +1,26 @@
+[
+  {
+    "pct": 2.0,
+    "trades": 2,
+    "expectancy_r": 1.0,
+    "final_balance": 104.0507,
+    "max_drawdown_pct": 1.198,
+    "rejects_no_money": 0
+  },
+  {
+    "pct": 3.0,
+    "trades": 2,
+    "expectancy_r": 1.0,
+    "final_balance": 102.7892,
+    "max_drawdown_pct": 2.396,
+    "rejects_no_money": 0
+  },
+  {
+    "pct": 4.0,
+    "trades": 2,
+    "expectancy_r": 1.0,
+    "final_balance": 106.8398,
+    "max_drawdown_pct": 3.421,
+    "rejects_no_money": 0
+  }
+]

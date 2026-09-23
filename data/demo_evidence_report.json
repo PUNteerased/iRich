@@ -1,0 +1,15 @@
+{
+  "log_dir": "D:\\Project\\!iRich\\logs",
+  "decision_count": 0,
+  "risk_event_count": 0,
+  "trade_count": 0,
+  "p0_8_decision_id_present": false,
+  "p0_8_model_identity_present": false,
+  "p0_4_lot_ok": true,
+  "p0_4_risk_ceiling_ok": true,
+  "known_reject_codes_only": true,
+  "pass": false,
+  "notes": [
+    "No decisions.jsonl yet \u2014 start Demo briefly: python src/main.py then re-run."
+  ]
+}

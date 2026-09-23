@@ -1,0 +1,35 @@
+[
+  {
+    "symbol": "EURUSD",
+    "bars": 29481,
+    "trades": 0,
+    "wins": 0,
+    "losses": 0,
+    "win_rate": 0.0,
+    "sum_r": 0.0,
+    "expectancy_r": 0.0,
+    "max_risk_usd": 0.0,
+    "rejects": {
+      "REJECT_MTF": 25657,
+      "REJECT_ATR_ABNORMAL": 3778,
+      "REJECT_CONFIDENCE": 43,
+      "REJECT_SPREAD": 2
+    },
+    "sl_distance": {
+      "count": 45,
+      "min": 0.000774,
+      "p25": 0.000979,
+      "median": 0.001216,
+      "p75": 0.001332,
+      "max": 0.00177,
+      "band_min": 0.001,
+      "band_max": 0.0015,
+      "below_band": 12,
+      "in_band": 26,
+      "above_band": 7
+    },
+    "replay_spread_points": 1.13,
+    "spread_cap_points": 1.13,
+    "spread_gate_calibrated": true
+  }
+]

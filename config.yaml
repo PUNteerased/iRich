@@ -1,0 +1,234 @@
+account_profile: micro_100
+# All tradable symbols (models / export / confidence). Scan list is weekday vs weekend.
+# Portfolio balance / leverage for MM are read live from MT5 account_info — not from yaml.
+symbols:
+  - EURUSD
+  - USDJPY
+  - XAUUSD
+  - BTCUSD
+weekday_symbols:
+  - EURUSD
+  - USDJPY
+  - XAUUSD
+weekend_symbols:
+  - BTCUSD
+
+timeframes:
+  bias: H1
+  sweep: M15
+  confirm: M5
+  exec: M1
+
+position_guard:
+  max_total_open: 1
+  count_all_positions: true
+
+lot:
+  mode: fixed
+  volume: 0.01
+
+risk:
+  max_risk_usd: 2.00
+  rr: 3.0
+  # G21: default floor TF is M5; per-symbol overrides keep SL inside caps.
+  atr_sl_timeframe: M5
+  atr_sl_timeframe_by_symbol:
+    XAUUSD: M1
+  atr_sl_mult: 1.0
+  atr_sl_mult_by_symbol:
+    # Calibrated so median structural SL lands inside per_symbol_sl_caps (replay).
+    EURUSD: 4.5
+    USDJPY: 4.0
+    XAUUSD: 1.0
+    BTCUSD: 3.0
+  monthly_max_dd_pct: 10.0
+  # I-12: reject when the market drifted this far (as a fraction of SL distance)
+  # away from the signal bar close before the order is sent.
+  max_entry_drift_r: 0.25
+  daily_max_loss_r: 3.0
+  max_consecutive_losses: 3
+  # Sprint 2 (Hold Longer, live): scripts/exit_policy_ab.py showed the higher
+  # break_even_r/trailing_start_r combo winning on R/week within the monthly
+  # DD cap. break_even_r and trailing_start_r both move to 2.0 together so
+  # structure_trail_sl's activate_r never fires before break-even has parked
+  # the SL (main.py enforces activate_r = max(trailing_start_r, break_even_r)
+  # as a floor regardless of what is configured here).
+  break_even_r: 2.0
+  trailing_start_r: 2.0
+  # Slightly wider than Sprint 1's 1.0 so the ATR trail gives a winner a
+  # little more room once it is running past break-even.
+  trailing_atr_mult: 1.2
+  prefer_structure_trail: true
+  # Sprint 1 #2: BE parks the SL past true break-even (not exactly on entry)
+  # so a single-tick reversal can't scratch the trade at a small loss after
+  # commission/spread. Offset = max(be_lock_pips*pip, atr*be_lock_atr_mult, 1*point).
+  be_lock_pips: 2.0
+  be_lock_atr_mult: 0.0
+  # Sprint 2 #1: once favour crosses 3R/4R/5R, floor the live SL at
+  # entry +/- 1R/2R/3R (src.risk.manage_open_position); never loosens.
+  enable_staircase: true
+  # Sprint 2 #4: hybrid trail — once a structure trail candidate exists, only
+  # use it over the ATR candidate while it isn't looser than the ATR trail by
+  # more than this many ATRs; beyond that, prefer the tighter ATR candidate.
+  structure_max_giveback_atr: 1.0
+  # Sprint 2 #5: hard time-stop — flatten (close_position) any position still
+  # open past this many M1 bars, regardless of R.
+  max_hold_bars_m1: 500
+  friday_gap_block_hour_utc: 18
+  # Sprint 1 #6: flatten FX/XAU open positions at friday_gap_block_hour_utc
+  # instead of holding them through the weekend gap. BTCUSD trades weekends
+  # and is never flattened here.
+  friday_flatten: true
+  opposing_tp_min_rr: 3.0
+  opposing_tp_max_rr: 8.0
+  # Sprint 4 #2: reject new entries outside src/session_filter.py windows.
+  session_filter_enabled: true
+  per_symbol_sl_caps:
+    EURUSD:
+      min_pips: 10
+      max_pips: 15
+    USDJPY:
+      min_pips: 12
+      max_pips: 18
+    XAUUSD:
+      min_points: 150
+      max_points: 250
+    BTCUSD:
+      # Price dollars: on 0.01 lot, $200 move ≈ $2.00 risk
+      min_dollars: 100
+      max_dollars: 200
+
+spread:
+  # Cap in POINTS: (ask - bid) / symbol_info.point
+  # TBD_CALIBRATE means unmeasured on this broker; the gate fails closed until
+  # scripts/calibrate_spread.py has sampled several sessions.
+  calibration_path: data/spread_calibration.json
+  max_points_by_symbol:
+    EURUSD: TBD_CALIBRATE
+    USDJPY: TBD_CALIBRATE
+    XAUUSD: TBD_CALIBRATE
+    BTCUSD: TBD_CALIBRATE
+  # Sprint 1 #5: on top of the absolute cap above, reject when the live spread
+  # exceeds this multiple of the calibrated average/typical spread. Skipped
+  # when the calibration file has no average for the symbol.
+  max_mult_of_avg: 2.0
+
+labels:
+  # Must match risk.atr_sl_timeframe so barriers == live structural SL scale (G21).
+  atr_sl_timeframe: M5
+  atr_sl_timeframe_by_symbol:
+    XAUUSD: M1
+  atr_sl: 1.0
+  atr_tp: 3.0
+  horizon_m1: 45
+  # When omitted, training uses risk.atr_sl_mult(symbol).
+  atr_sl_by_symbol: {}
+
+money_management:
+  mode: FIXED_TIER
+  # Sprint 1 #7: while Demo validation is running, force the smallest lot and
+  # tightest risk ceiling regardless of tier/equity. Flip to false only after
+  # the loop is validated and sizing up is intentional.
+  option_a_lock: true
+  # Sprint 2 #6 scaffolding: while false (default), behaviour is unchanged —
+  # FIXED_TIER steps by balance alone, same as before this sprint. When true
+  # AND option_a_lock is false, a tier step past tier 0 additionally requires
+  # the rolling performance gate (src.money_management.dynamic_scaling_gate_passed)
+  # to pass; a failing gate forces the smallest lot/$2 ceiling back on. Stays
+  # false until the Demo validation loop earns the right to flip it.
+  dynamic_scaling_enabled: false
+  dynamic_scaling_min_trades: 20
+  dynamic_scaling_min_win_rate: 0.55
+  dynamic_scaling_min_avg_r: 2.0
+  dynamic:
+    risk_per_trade_pct: 2.0
+    max_risk_usd_cap: 50.0
+    max_lot_size: 1.00
+    min_lot_size: 0.01
+  fixed_tier:
+    - min_balance: 0
+      max_balance: 199.99
+      lot: 0.01
+      max_risk_usd: 2.00
+    - min_balance: 200
+      max_balance: 499.99
+      lot: 0.02
+      max_risk_usd: 4.00
+    - min_balance: 500
+      max_balance: 999.99
+      lot: 0.05
+      max_risk_usd: 10.00
+
+sniper:
+  # Do NOT lower below 0.75 until the entry-funnel A/B (scripts/entry_funnel_ab.py)
+  # locks a config by R/week with acceptable max_dd.
+  min_probability: 0.75
+  scan_seconds: 10
+  # Sprint 4 #1: AND-stack (H1 bias + M15 sweep + M5 ChoCH + M1 FVG) when true.
+  # Sprint 2: scripts/entry_funnel_ab.py recommended soft-MTF (H1 bias + M1
+  # FVG hard-required; M15 sweep/M5 ChoCH become fusion-score bonuses instead
+  # of hard rejects) — flipped per that report's recommendation.
+  require_full_mtf: false
+  atr_zscore_max: 2.0
+  # Sprint 4 #1: hard-gate — completed FVG bar tick volume >= SMA(volume, N).
+  require_fvg_volume: true
+  volume_sma_window: 20
+  # Sprint 4 #1: optional extra hard gate — M15 S/R break must agree with the FVG.
+  require_m15_break_with_fvg: false
+  # Sprint 4 #1: when require_full_mtf is false, sweep/choch no longer hard-reject —
+  # each becomes a bonus added into the fusion score instead.
+  soft_sweep_bonus: 0.05
+  soft_choch_bonus: 0.05
+
+fusion:
+  tech_weight: 0.6
+  news_weight: 0.4
+
+news:
+  pre_minutes: 30
+  post_minutes: 15
+  strict_news: true
+  # Skip FX calendar hard-stop for these (crypto weekends)
+  skip_calendar_symbols:
+    - BTCUSD
+  currencies:
+    - USD
+    - EUR
+    - JPY
+  sentiment_cache_minutes: 60
+
+learning:
+  alpha: 0.1
+  w_min: 0.3
+  w_max: 2.0
+  state_path: models/confidence_state.json
+  # Keep false until scripts/walk_forward_confidence.py recommends enable.
+  online_confidence: false
+  drift_window: 20
+  drift_min_trades: 10
+  drift_min_win_rate: 0.30
+  drift_min_expectancy_r: -0.25
+  # Retention so 24/7 jsonl growth stays bounded
+  max_lines_per_day: 500
+  # How far back sync_orphaned_deals() may sweep MT5 history on startup
+  orphan_lookback_days: 14
+
+logging:
+  max_bytes: 5000000
+  backup_count: 5
+
+paths:
+  data_raw: data/raw
+  experience: data/experience
+  models: models
+
+magic: 999100
+order_comment: "Sniper $100 Bot"
+mt5:
+  path: null
+  login: null
+  password: null
+  server: null
+  deviation: 20
+  deviation_by_symbol:
+    BTCUSD: 50
