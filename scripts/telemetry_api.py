@@ -9,6 +9,7 @@ place orders.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -44,12 +45,18 @@ from src.telemetry import (
 )
 
 app = FastAPI(title="iRich Telemetry", version="1.1.0", docs_url="/docs")
+
+# Local + Vercel. Override with comma list, e.g. CORS_ORIGINS=https://irich-dashboard.vercel.app
+_cors = (os.getenv("CORS_ORIGINS") or "*").strip()
+_allow_origins = (
+    ["*"]
+    if _cors == "*"
+    else [o.strip() for o in _cors.split(",") if o.strip()]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=_allow_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],

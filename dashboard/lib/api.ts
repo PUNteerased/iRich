@@ -3,6 +3,12 @@
 export const API_BASE =
   process.env.NEXT_PUBLIC_TELEMETRY_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000'
 
+const TELEMETRY_HEADERS: HeadersInit = {
+  Accept: 'application/json',
+  // Free ngrok interstitial blocks bare browser fetch without this.
+  'ngrok-skip-browser-warning': '1',
+}
+
 export async function fetchTelemetry<T>(path: string, signal?: AbortSignal): Promise<T> {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
   const res = await fetch(url, {
@@ -10,7 +16,7 @@ export async function fetchTelemetry<T>(path: string, signal?: AbortSignal): Pro
     cache: 'no-store',
     next: { revalidate: 0 },
     signal,
-    headers: { Accept: 'application/json' },
+    headers: TELEMETRY_HEADERS,
   })
   if (!res.ok) {
     throw new Error(`Telemetry ${res.status}: ${path}`)
@@ -29,7 +35,7 @@ export async function mutateTelemetry<T>(
     cache: 'no-store',
     next: { revalidate: 0 },
     headers: {
-      Accept: 'application/json',
+      ...TELEMETRY_HEADERS,
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
