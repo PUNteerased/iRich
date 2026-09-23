@@ -26,10 +26,15 @@ python scripts/telemetry_api.py
 
 1. Import this repo in Vercel (Root Directory = repo root).
 2. Framework: Next.js
-3. Environment variable:
+3. Environment variables:
 
 | Name | Value |
 |------|--------|
-| `NEXT_PUBLIC_TELEMETRY_URL` | Public HTTPS URL of your telemetry API |
+| `TELEMETRY_UPSTREAM` | Public HTTPS ngrok URL of telemetry API (server proxy) |
+| `NEXT_PUBLIC_TELEMETRY_URL` | Same ngrok URL (optional; local/WS only) |
 
-The dashboard is read-mostly UI. Portfolio/logs come from the Python `telemetry_api` service — host that API on a VPS/cloud that can reach your MT5 machine (or the same PC with a tunnel).
+On `*.vercel.app` the browser calls **same-origin** `/api/bridge/*` — the Next.js
+route proxies to `TELEMETRY_UPSTREAM` and adds the ngrok skip header server-side.
+That avoids CORS / preflight failures with free ngrok.
+
+Redeploy after changing env. Keep `ngrok http 8000` + `telemetry_api` running locally.

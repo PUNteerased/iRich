@@ -1,22 +1,43 @@
 /** Telemetry client — always bypass Next.js / fetch cache (Gotcha #3). */
 
-export const API_BASE =
-  process.env.NEXT_PUBLIC_TELEMETRY_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000'
+function isVercelHost(): boolean {
+  if (typeof window === 'undefined') return false
+  const h = window.location.hostname
+  return h.endsWith('.vercel.app') || h === 'vercel.app'
+}
 
-const TELEMETRY_HEADERS: HeadersInit = {
-  Accept: 'application/json',
-  // Free ngrok interstitial blocks bare browser fetch without this.
-  'ngrok-skip-browser-warning': '1',
+/** On Vercel, call same-origin /api/bridge (server proxies to ngrok — no CORS). */
+export function resolveApiBase(): string {
+  if (typeof window !== 'undefined' && isVercelHost()) {
+    return `${window.location.origin}/api/bridge`
+  }
+  if (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_TELEMETRY_URL) {
+    return process.env.NEXT_PUBLIC_TELEMETRY_URL.replace(/\/$/, '')
+  }
+  return 'http://127.0.0.1:8000'
+}
+
+export const API_BASE =
+  (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_TELEMETRY_URL?.replace(/\/$/, '')) ||
+  'http://127.0.0.1:8000'
+
+function telemetryHeaders(viaProxy: boolean): HeadersInit {
+  const h: Record<string, string> = { Accept: 'application/json' }
+  // Only needed for direct browser→ngrok; proxy adds it server-side.
+  if (!viaProxy) h['ngrok-skip-browser-warning'] = '1'
+  return h
 }
 
 export async function fetchTelemetry<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
+  const base = resolveApiBase()
+  const viaProxy = base.includes('/api/bridge')
+  const url = `${base}${path.startsWith('/') ? path : `/${path}`}`
   const res = await fetch(url, {
     method: 'GET',
     cache: 'no-store',
     next: { revalidate: 0 },
     signal,
-    headers: TELEMETRY_HEADERS,
+    headers: telemetryHeaders(viaProxy),
   })
   if (!res.ok) {
     throw new Error(`Telemetry ${res.status}: ${path}`)
@@ -29,13 +50,15 @@ export async function mutateTelemetry<T>(
   method: 'POST' | 'PUT' | 'DELETE',
   body?: unknown,
 ): Promise<T> {
-  const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
+  const base = resolveApiBase()
+  const viaProxy = base.includes('/api/bridge')
+  const url = `${base}${path.startsWith('/') ? path : `/${path}`}`
   const res = await fetch(url, {
     method,
     cache: 'no-store',
     next: { revalidate: 0 },
     headers: {
-      ...TELEMETRY_HEADERS,
+      ...telemetryHeaders(viaProxy),
       ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,

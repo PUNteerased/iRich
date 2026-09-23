@@ -150,8 +150,13 @@ export function useLiveStream(pollMs = 1000) {
 
     const connectWs = () => {
       if (stopped) return
+      const url = telemetryWsUrl('/ws/live')
+      if (!url) {
+        startPoll()
+        return
+      }
       try {
-        const ws = new WebSocket(telemetryWsUrl('/ws/live'))
+        const ws = new WebSocket(url)
         wsRef.current = ws
         ws.onopen = () => {
           if (stopped) return
