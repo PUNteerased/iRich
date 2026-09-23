@@ -10,6 +10,7 @@ import {
   Bot,
   ChevronDown,
   Clock3,
+  Cpu,
   Gauge,
   LayoutDashboard,
   ListFilter,
@@ -30,12 +31,23 @@ import {
   Zap,
   CalendarDays,
 } from 'lucide-react'
-import { useTelemetry } from '@/lib/useTelemetry'
+import { useLiveStream, useTelemetry } from '@/lib/useTelemetry'
 import { formatIctDateTime, formatIctTime, nowIctLabel } from '@/lib/time'
 import { AccountSwitcher } from '@/components/AccountSwitcher'
 import { PerformanceCalendar } from '@/components/PerformanceCalendar'
+import { HardwarePanel } from '@/components/HardwarePanel'
 
-type PageKey = 'overview' | 'analytics' | 'calendar' | 'trades' | 'execution' | 'risk' | 'models' | 'system' | 'config'
+type PageKey =
+  | 'overview'
+  | 'analytics'
+  | 'calendar'
+  | 'trades'
+  | 'execution'
+  | 'risk'
+  | 'models'
+  | 'hardware'
+  | 'system'
+  | 'config'
 
 const navItems: { key: PageKey; label: string; icon: typeof LayoutDashboard }[] = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -45,6 +57,7 @@ const navItems: { key: PageKey; label: string; icon: typeof LayoutDashboard }[] 
   { key: 'execution', label: 'Execution stream', icon: Radio },
   { key: 'risk', label: 'Risk & breakers', icon: ShieldCheck },
   { key: 'models', label: 'Models & sentiment', icon: Sparkles },
+  { key: 'hardware', label: 'Hardware', icon: Cpu },
   { key: 'system', label: 'System health', icon: Gauge },
   { key: 'config', label: 'System config', icon: Settings2 },
 ]
@@ -235,8 +248,17 @@ function DecisionTable({ rows, compact = false }: { rows: DecisionRow[]; compact
   )
 }
 
-function Overview({ setPage }: { setPage: (page: PageKey) => void }) {
-  const { data, error, refresh } = useTelemetry<OverviewPayload>('/api/overview')
+function Overview({
+  setPage,
+  data,
+  error,
+  mode,
+}: {
+  setPage: (page: PageKey) => void
+  data: OverviewPayload | null
+  error: string | null
+  mode: 'ws' | 'poll' | 'offline'
+}) {
   const p = data?.portfolio
   const br = data?.breaker || {}
   const pos = data?.position
@@ -258,9 +280,12 @@ function Overview({ setPage }: { setPage: (page: PageKey) => void }) {
                 }`}
           </p>
         </div>
-        <button className="button button-quiet" onClick={() => void refresh()}>
-          <RefreshCw size={14} /> Refresh data
-        </button>
+        <div className="heading-actions">
+          <span className={`pill ${mode === 'offline' ? 'pill-amber' : 'pill-green'}`}>
+            <StatusDot color={mode === 'offline' ? 'amber' : 'emerald'} />{' '}
+            {mode === 'ws' ? 'LIVE 1Hz' : mode === 'poll' ? 'POLL 1s' : 'OFFLINE'}
+          </span>
+        </div>
       </div>
       <div className="metric-grid">
         <MetricCard
@@ -633,8 +658,12 @@ function Models() {
   )
 }
 
-function System() {
-  const { data, error } = useTelemetry<{
+function System({
+  data,
+  error,
+  mode,
+}: {
+  data: {
     ok?: boolean
     halt?: boolean
     decisions_age_sec?: number | null
@@ -643,8 +672,10 @@ function System() {
     trades_exists?: boolean
     ts?: string
     option_a_lock?: boolean
-  }>('/api/health')
-
+  } | null
+  error: string | null
+  mode: 'ws' | 'poll' | 'offline'
+}) {
   return (
     <>
       <div className="page-heading">
@@ -664,7 +695,11 @@ function System() {
             {[
               ['iRich trading engine', 'python src/main.py + MT5', error ? 'UNKNOWN' : 'EXPECTED'],
               ['Telemetry bridge', 'FastAPI · port 8000', error ? 'DOWN' : 'ONLINE'],
-              ['Dashboard client', 'Polling every 3 seconds', error ? 'RETRYING' : 'CONNECTED'],
+              [
+                'Dashboard client',
+                mode === 'ws' ? 'WebSocket live · 1 Hz' : mode === 'poll' ? 'HTTP poll · 1s' : 'Disconnected',
+                error ? 'RETRYING' : mode === 'ws' ? 'LIVE' : 'CONNECTED',
+              ],
               ['Display timezone', 'Asia/Bangkok (ICT)', 'LOCKED'],
             ].map(([name, desc, status], i) => (
               <div className="pipeline-step" key={String(name)}>
@@ -960,7 +995,8 @@ export default function Page() {
   const [mobileNav, setMobileNav] = useState(false)
   // Empty until mount — avoids SSR/client clock mismatch (hydration).
   const [clock, setClock] = useState('--:--:-- ICT')
-  const { data: health } = useTelemetry<{ ok?: boolean; halt?: boolean }>('/api/health', 5000)
+  const live = useLiveStream(1000)
+  const health = live.health
   const current = useMemo(() => navItems.find((item) => item.key === page) ?? navItems[0], [page])
 
   useEffect(() => {
@@ -970,7 +1006,12 @@ export default function Page() {
   }, [])
   const content =
     page === 'overview' ? (
-      <Overview setPage={setPage} />
+      <Overview
+        setPage={setPage}
+        data={(live.overview as OverviewPayload | null) ?? null}
+        error={live.error}
+        mode={live.mode}
+      />
     ) : page === 'analytics' ? (
       <Analytics />
     ) : page === 'calendar' ? (
@@ -983,8 +1024,10 @@ export default function Page() {
       <Risk />
     ) : page === 'models' ? (
       <Models />
+    ) : page === 'hardware' ? (
+      <HardwarePanel data={live.hardware} mode={live.mode} error={live.error} />
     ) : page === 'system' ? (
-      <System />
+      <System data={health} error={live.error} mode={live.mode} />
     ) : (
       <Config />
     )
@@ -1030,7 +1073,9 @@ export default function Page() {
             <StatusDot color={health?.ok ? 'emerald' : 'rose'} />
             <span>
               <b>{health?.ok ? 'Bridge online' : 'Bridge offline'}</b>
-              <small>{health?.halt ? 'HALT' : 'Online'}</small>
+              <small>
+                {live.mode === 'ws' ? 'WS live' : live.mode === 'poll' ? 'Poll 1s' : health?.halt ? 'HALT' : 'Offline'}
+              </small>
             </span>
             <MoreHorizontal size={15} className="muted" />
           </div>
@@ -1049,7 +1094,8 @@ export default function Page() {
           <div className="topbar-actions">
             <div className="server-time">
               <span>
-                <StatusDot /> LOCAL ICT
+                <StatusDot color={live.mode === 'offline' ? 'rose' : 'emerald'} />{' '}
+                {live.mode === 'ws' ? 'LIVE WS' : live.mode === 'poll' ? 'LIVE POLL' : 'OFFLINE'} · ICT
               </span>
               <b>{clock}</b>
             </div>
@@ -1066,7 +1112,7 @@ export default function Page() {
         <div className="page-content">
           {content}
           <footer>
-            <span>iRich OS · Final v1.4</span>
+            <span>iRich OS · Final v1.5</span>
             <span>ICT · Asia/Bangkok</span>
             <span>© 2026 iRich</span>
           </footer>

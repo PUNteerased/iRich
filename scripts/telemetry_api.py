@@ -5,21 +5,25 @@
 Portfolio / logs endpoints are read-only. Account endpoints may write the local
 credentials store (`data/mt5_accounts.json`) and verify MT5 login — they never
 place orders.
+
+Live updates: WebSocket  /ws/live  (overview + hardware + health ~1 Hz)
 """
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 import sys
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.accounts import (
@@ -31,6 +35,7 @@ from src.accounts import (
     verify_mt5_login,
 )
 from src.config import load_config
+from src.hardware import build_hardware
 from src.telemetry import (
     build_analytics,
     build_calendar,
@@ -44,9 +49,8 @@ from src.telemetry import (
     invalidate_portfolio_cache,
 )
 
-app = FastAPI(title="iRich Telemetry", version="1.1.0", docs_url="/docs")
+app = FastAPI(title="iRich Telemetry", version="1.2.0", docs_url="/docs")
 
-# Local + Vercel. Override with comma list, e.g. CORS_ORIGINS=https://irich-dashboard.vercel.app
 _cors = (os.getenv("CORS_ORIGINS") or "*").strip()
 _allow_origins = (
     ["*"]
@@ -73,6 +77,16 @@ class AccountBody(BaseModel):
     verify: bool = True
 
 
+def _live_tick() -> dict[str, Any]:
+    cfg = load_config()
+    return {
+        "type": "tick",
+        "health": build_health(cfg),
+        "overview": build_overview(cfg),
+        "hardware": build_hardware(),
+    }
+
+
 @app.get("/api/health")
 def api_health():
     return build_health(load_config())
@@ -81,6 +95,11 @@ def api_health():
 @app.get("/api/overview")
 def api_overview():
     return build_overview(load_config())
+
+
+@app.get("/api/hardware")
+def api_hardware():
+    return build_hardware()
 
 
 @app.get("/api/decisions")
@@ -167,7 +186,6 @@ def api_accounts_activate(account_id: str):
     if match is None:
         raise HTTPException(status_code=404, detail="account_not_found")
 
-    # Need full password from store for verify
     from src.accounts import load_store
 
     full = next((a for a in (load_store().get("accounts") or []) if a.get("id") == account_id), None)
@@ -207,6 +225,31 @@ def api_accounts_active():
             "path": acc.get("path") or "",
         }
     }
+
+
+@app.websocket("/ws/live")
+async def ws_live(websocket: WebSocket):
+    """Push overview + hardware + health ~1 Hz for real-time dashboard."""
+    await websocket.accept()
+    # Warm CPU percent counters so the first tick is non-zero.
+    try:
+        import psutil
+
+        psutil.cpu_percent(interval=None)
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        while True:
+            payload = await asyncio.to_thread(_live_tick)
+            await websocket.send_text(json.dumps(payload, default=str))
+            await asyncio.sleep(1.0)
+    except WebSocketDisconnect:
+        return
+    except Exception:  # noqa: BLE001
+        try:
+            await websocket.close()
+        except Exception:  # noqa: BLE001
+            pass
 
 
 if __name__ == "__main__":

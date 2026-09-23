@@ -60,6 +60,26 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .perf-metric strong { display:block; font:600 18px ui-monospace,monospace; margin-top:8px; }
 .perf-metric small { display:block; margin-top:4px; }
 .perf-day-detail { margin-top:18px; border-top:1px solid #252a2f; padding-top:14px; }
+
+/* Hardware live page */
+.hw-meter { height:6px; border-radius:99px; background:#1c2128; overflow:hidden; margin:10px 0 8px; }
+.hw-meter-fill { height:100%; border-radius:99px; transition:width .35s ease; }
+.hw-meter-fill.tone-indigo { background:var(--indigo); }
+.hw-meter-fill.tone-green { background:var(--green); }
+.hw-meter-fill.tone-amber { background:var(--amber); }
+.hw-meter-fill.tone-rose { background:var(--red); }
+.hw-cores { display:flex; flex-direction:column; gap:8px; max-height:280px; overflow:auto; }
+.hw-core { display:grid; grid-template-columns:28px 1fr 42px; gap:8px; align-items:center; font-size:11px; color:var(--muted); }
+.hw-core .hw-meter { margin:0; }
+.hw-disks { display:flex; flex-direction:column; gap:14px; }
+.hw-disk .hw-meter { margin:6px 0 0; }
+.hw-proc-table { display:flex; flex-direction:column; gap:0; font-size:11px; }
+.hw-proc-head, .hw-proc-row { display:grid; grid-template-columns:64px 110px 64px 72px 1fr; gap:10px; padding:9px 0; border-top:1px solid #252a2f; align-items:center; }
+.hw-proc-head { color:var(--muted); border-top:0; padding-top:0; font-size:10px; letter-spacing:.6px; }
+.hw-proc-row span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.metric-card strong { display:block; font:600 22px ui-monospace,monospace; margin-top:8px; }
+.metric-card small { display:block; }
+
 @media (max-width: 1000px) { .perf-layout { grid-template-columns:1fr; } .perf-weekdays,.perf-week-row { grid-template-columns:repeat(7,minmax(0,1fr)); } .perf-weekdays span:last-child,.perf-week-sum { display:none; } }
 @media (max-width: 1000px) { .sidebar { width:215px; }.page-content { padding:28px 24px; }.position-grid { grid-template-columns:repeat(3,1fr); }.position-instrument { grid-column:span 3; }.model-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width: 720px) { html, body { overflow: auto; height: auto; }.app-shell { height: auto; max-height: none; overflow: visible; }.sidebar { position:fixed; z-index:20; inset:0 auto 0 0; transform:translateX(-100%); transition:transform .2s; width:260px; height:100vh; }.sidebar-open { transform:translateX(0); box-shadow:14px 0 40px #000; }.main { height: auto; overflow: visible; }.mobile-close,.mobile-menu { display:block; }.topbar { padding:0 16px; gap:10px; position: sticky; }.mobile-menu { padding:3px; }.crumb { flex:1; }.server-time { display:none; }.page-content { padding:24px 14px; }.page-heading { align-items:flex-start; flex-direction:column; margin-bottom:20px; }.page-heading h1 { font-size:23px; }.metric-grid,.metric-grid.three,.risk-grid,.model-grid,.system-grid,.content-grid { grid-template-columns:1fr; }.position-grid { grid-template-columns:repeat(2,1fr); }.position-instrument { grid-column:span 2; }.position-levels { flex-wrap:wrap; gap:7px; }.level-line { display:none; }.sentiment-big { grid-template-columns:1fr; gap:18px; }.notice-card { align-items:flex-start; flex-wrap:wrap; }.notice-card .button { margin-left:29px; }footer { gap:8px; flex-wrap:wrap; }.heading-actions { width:100%; } }

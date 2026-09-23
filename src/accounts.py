@@ -207,8 +207,33 @@ def apply_active_account(mt5_cfg: dict[str, Any]) -> dict[str, Any]:
     return mt5_cfg
 
 
-def verify_mt5_login(account: dict[str, Any]) -> dict[str, Any]:
-    """Attempt a one-shot MT5 login; always shutdown afterward."""
+def bot_holds_mt5(max_age_sec: float = 60.0) -> bool:
+    """True when the trading bot recently published a portfolio snapshot.
+
+    On Windows the MetaTrader5 binding is effectively single-owner. While the
+    bot holds the terminal, the telemetry API must NOT call initialize/shutdown.
+    """
+    from .portfolio_snapshot import read_portfolio_snapshot
+
+    return read_portfolio_snapshot(max_age_sec=max_age_sec) is not None
+
+
+def verify_mt5_login(account: dict[str, Any], *, force: bool = False) -> dict[str, Any]:
+    """Attempt a one-shot MT5 login; always shutdown afterward.
+
+    If the bot already holds MT5 (fresh portfolio snapshot), skip the live
+    initialize and return deferred=ok so credentials can be saved + reload flag
+    written without knocking the engine offline (avoids IPC timeout -10005).
+    """
+    if not force and bot_holds_mt5():
+        return {
+            "ok": True,
+            "deferred": True,
+            "reason": "bot_holds_mt5",
+            "login": int(account.get("login") or 0),
+            "server": str(account.get("server") or ""),
+        }
+
     try:
         import MetaTrader5 as mt5
     except ImportError as exc:
@@ -238,6 +263,7 @@ def verify_mt5_login(account: dict[str, Any]) -> dict[str, Any]:
         return {"ok": False, "error": f"no_account_info: {err}"}
     result = {
         "ok": True,
+        "deferred": False,
         "login": int(info.login),
         "server": str(info.server),
         "balance": float(info.balance),

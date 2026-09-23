@@ -86,6 +86,7 @@ export function AccountSwitcher() {
     setBusy(true)
     setError(null)
     try {
+      // verify:true is safe — API defers MT5 login while the bot holds the terminal
       await mutateTelemetry('/api/accounts', 'POST', {
         label: form.label || `${form.server} · ${form.login}`,
         login: Number(form.login),
