@@ -1,67 +1,48 @@
 @echo off
-setlocal EnableExtensions
 cd /d "%~dp0"
-
 title iRich launcher
+
 echo ========================================
 echo  iRich - start all services
 echo ========================================
 echo.
 
-if exist "%~dp0.venv\Scripts\python.exe" (
-  set "PY=%~dp0.venv\Scripts\python.exe"
+set "BUSY8000=0"
+set "BUSY3000=0"
+netstat -ano | findstr ":8000" | findstr "LISTENING" >nul 2>&1 && set "BUSY8000=1"
+netstat -ano | findstr ":3000" | findstr "LISTENING" >nul 2>&1 && set "BUSY3000=1"
+
+echo [1/4] Starting bot ...
+start "iRich Bot" "%~dp0scripts\launch_bot.cmd"
+
+if "%BUSY8000%"=="1" (
+  echo [2/4] Telemetry API already on :8000 - skip
 ) else (
-  set "PY=python"
+  echo [2/4] Starting telemetry API ...
+  start "iRich Telemetry API" "%~dp0scripts\launch_api.cmd"
 )
 
-echo Python: %PY%
-echo.
-
-REM --- helpers: skip if port already listening ---
-call :port_in_use 8000
-set "API_BUSY=%ERRORLEVEL%"
-call :port_in_use 3000
-set "DASH_BUSY=%ERRORLEVEL%"
-
-REM 1) Trading bot (skip if main.py already running)
-call :proc_running "src\main.py"
-if errorlevel 1 (
-  echo [1/4] Bot already running — skip
+if "%BUSY3000%"=="1" (
+  echo [3/4] Dashboard already on :3000 - skip
 ) else (
-  echo [1/4] Starting bot  (src\main.py) ...
-  start "iRich Bot" /D "%~dp0" cmd /k ""%PY%" src\main.py"
+  echo [3/4] Starting dashboard ...
+  start "iRich Dashboard" "%~dp0scripts\launch_dashboard.cmd"
 )
 
-REM 2) Telemetry API
-if "%API_BUSY%"=="1" (
-  echo [2/4] Telemetry API already on :8000 — skip
-) else (
-  echo [2/4] Starting telemetry API  (http://127.0.0.1:8000) ...
-  start "iRich Telemetry API" /D "%~dp0" cmd /k ""%PY%" scripts\telemetry_api.py"
-)
-
-REM 3) Next.js dashboard
-if "%DASH_BUSY%"=="1" (
-  echo [3/4] Dashboard already on :3000 — skip
-) else (
-  echo [3/4] Starting dashboard  (http://localhost:3000) ...
-  start "iRich Dashboard" /D "%~dp0dashboard" cmd /k "if not exist node_modules npm install & npm run dev"
-)
-
-REM 4) ngrok
 where ngrok >nul 2>&1
 if errorlevel 1 (
-  echo [4/4] ngrok not found in PATH — skip tunnel
-) else (
-  call :proc_running "ngrok"
-  if errorlevel 1 (
-    echo [4/4] ngrok already running — skip
-  ) else (
-    echo [4/4] Starting ngrok  (beula-nonintersecting-frigidly.ngrok-free.dev) ...
-    start "iRich ngrok" cmd /k "ngrok http --domain=beula-nonintersecting-frigidly.ngrok-free.dev 8000"
-  )
+  echo [4/4] ngrok not in PATH - skip
+  goto :done
 )
+tasklist /FI "IMAGENAME eq ngrok.exe" 2>nul | findstr /I "ngrok.exe" >nul 2>&1
+if not errorlevel 1 (
+  echo [4/4] ngrok already running - skip
+  goto :done
+)
+echo [4/4] Starting ngrok ...
+start "iRich ngrok" "%~dp0scripts\launch_ngrok.cmd"
 
+:done
 echo.
 echo URLs:
 echo   Telemetry  http://127.0.0.1:8000/docs
@@ -71,15 +52,3 @@ echo.
 echo Close each service window to stop it.
 echo.
 pause
-endlocal
-exit /b 0
-
-:port_in_use
-REM returns 1 if listening, 0 if free
-netstat -ano | findstr /R /C:":%~1 .*LISTENING" >nul 2>&1
-if errorlevel 1 (exit /b 0) else (exit /b 1)
-
-:proc_running
-REM returns 1 if command line contains arg, 0 otherwise
-wmic process where "CommandLine like '%%%~1%%'" get ProcessId 2>nul | findstr /R "[0-9]" >nul 2>&1
-if errorlevel 1 (exit /b 0) else (exit /b 1)
